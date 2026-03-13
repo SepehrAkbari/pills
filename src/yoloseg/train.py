@@ -1,3 +1,7 @@
+'''
+Trains YOLOv8 segmentation model for pill detection.
+'''
+
 import os
 import shutil
 import random
@@ -40,15 +44,13 @@ def split_dataset(split_ratio=0.8):
 
     move_files(train_imgs, 'train')
     move_files(val_imgs, 'val')
-    print(f"Split complete: {len(train_imgs)} train, {len(val_imgs)} val.")
 
-def create_yaml():
-    """Generates the dataset.yaml file required by YOLO."""
+def make_yaml():
     with open(CLASSES_FILE, 'r') as f:
         classes = [line.strip() for line in f.readlines() if line.strip()]
 
     yaml_content = {
-        'path': str(YOLO_DIR.absolute()), # Absolute path is safest for YOLO
+        'path': str(YOLO_DIR.absolute()),
         'train': 'images/train',
         'val': 'images/val',
         'names': {i: name for i, name in enumerate(classes)}
@@ -56,35 +58,19 @@ def create_yaml():
 
     with open(YAML_FILE, 'w') as f:
         yaml.dump(yaml_content, f, default_flow_style=False)
-    print(f"Created YOLO config at {YAML_FILE}")
-
-def train_model():
-    """Loads a pre-trained segmentation model and starts training."""
-    print("Initializing YOLOv8 Segmentation Model...")
-    
-    # We use the 'nano' segmentation model (yolov8n-seg.pt) as a starting point. 
-    # It's lightweight, fast to train, and usually more than enough for clean objects like pills.
+def train():
     model = YOLO('yolov8n-seg.pt') 
 
-    # Start training
-    # epochs: How many times to pass over the 15,000 images. 
-    # imgsz: YOLO resizes images to a square. 640 is standard.
     results = model.train(
         data=str(YAML_FILE),
         epochs=30, 
         imgsz=640,
-        batch=16, # Adjust this down (e.g., 8) if you run out of GPU/RAM memory
+        batch=16,
         project='runs/pill_segmentation',
         name='yolov8n_run1'
     )
-    print("Training complete!")
 
 if __name__ == "__main__":
-    # 1. Restructure the folders
     split_dataset()
-    
-    # 2. Build the config
-    create_yaml()
-    
-    # 3. Train
-    train_model()
+    make_yaml()
+    train()
