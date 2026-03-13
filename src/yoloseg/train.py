@@ -9,6 +9,8 @@ import yaml
 from pathlib import Path
 from ultralytics import YOLO
 
+random.seed(49)
+
 
 YOLO_DIR = Path("../../data/pill_dataset/yolo_dataset")
 IMAGES_DIR = YOLO_DIR / "images"
@@ -58,6 +60,7 @@ def make_yaml():
 
     with open(YAML_FILE, 'w') as f:
         yaml.dump(yaml_content, f, default_flow_style=False)
+        
 def train():
     model = YOLO('yolov8n-seg.pt') 
 
@@ -66,8 +69,8 @@ def train():
         epochs=30, 
         imgsz=640,
         batch=16,
-        project='runs/pill_segmentation',
-        name='yolov8n_run1'
+        project='runs/pills',
+        name='yolov8n'
     )
 
 if __name__ == "__main__":
